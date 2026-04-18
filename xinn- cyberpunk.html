@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Xinn Cyberpunk | Bio Link</title>
+    
+    <!-- Tailwind CSS + Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <style>
+        * {
+            font-family: 'Inter', 'Space Mono', monospace;
+        }
+        
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #03050b);
+            min-height: 100vh;
+        }
+        
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 3px rgba(0,255,255,0.4), 0 0 8px rgba(255,0,255,0.3); }
+            100% { box-shadow: 0 0 12px cyan, 0 0 20px magenta; }
+        }
+        
+        @keyframes glitchText {
+            0% { transform: skew(0deg, 0deg); text-shadow: -2px 0 cyan, 2px 0 magenta; }
+            20% { transform: skew(2deg, 0.5deg); text-shadow: 2px 0 cyan, -2px 0 magenta; }
+            40% { transform: skew(-1deg, -0.3deg); text-shadow: -1px 0 magenta, 1px 0 cyan; }
+            60% { transform: skew(0deg, 0deg); text-shadow: 2px 0 cyan; }
+            80% { transform: skew(1deg, 0.2deg); text-shadow: -2px 0 magenta; }
+            100% { transform: skew(0deg, 0deg); text-shadow: -2px 0 cyan, 2px 0 magenta; }
+        }
+        
+        .glitch-hover:hover {
+            animation: glitchText 0.3s ease-in-out infinite;
+        }
+        
+        .glass-panel {
+            background: rgba(12, 20, 35, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            border-radius: 2rem;
+        }
+        
+        .glass-card {
+            background: rgba(8, 16, 28, 0.65);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 12px #0ff, 0 0 24px #f0f;
+        }
+        
+        .bg-grid {
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .drag-handle {
+            cursor: grab;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0f1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: cyan;
+            border-radius: 8px;
+        }
+        
+        /* Animasi fade in */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-grid relative overflow-x-hidden">
+
+    <!-- Canvas Particles -->
+    <canvas id="cyberCanvas" class="fixed top-0 left-0 w-full h-full -z-5 pointer-events-none"></canvas>
+    
+    <div id="app" class="relative z-10 max-w-2xl mx-auto px-4 py-6 md:py-10">
+        
+        <!-- ============ PUBLIC VIEW ============ -->
+        <div id="publicView" class="fade-in-up">
+            <!-- Profile Card -->
+            <div class="glass-panel p-6 md:p-8 text-center mb-8 backdrop-blur-xl shadow-[0_0_25px_rgba(0,255,255,0.3)]">
+                <div class="relative inline-block">
+                    <div class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-cyan-400 shadow-[0_0_20px_cyan] animate-pulse">
+                        <!-- GANTI FOTO DI SINI -->
+                        <img id="profileImage" src="https://api.dicebear.com/9.x/identicon/svg?seed=XinnCyberpunk&backgroundColor=0a0f1e&radius=50" alt="avatar" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 text-2xl filter drop-shadow-glow">⚡</div>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black mt-5 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent glitch-hover">Xinn Cyberpunk</h1>
+                <p class="text-cyan-200/80 font-mono text-sm mt-2 tracking-wider flex items-center justify-center gap-2">
+                    <i class="fas fa-terminal"></i> >_ digital mercenary & creator
+                </p>
+                <p class="text-gray-300 mt-3 text-sm max-w-xs mx-auto">✦ neural interface | glitch aesthetics | future frontier ✦</p>
+            </div>
+
+            <!-- Links Container -->
+            <div id="linksContainer" class="flex flex-col gap-4 w-full"></div>
+
+            <!-- Admin Trigger -->
+            <div class="mt-10 text-center">
+                <button id="openAdminBtn" class="text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition-all backdrop-blur-sm px-4 py-2 rounded-full border border-cyan-500/30 hover:border-cyan-400">
+                    [ ADMIN // SECURE PANEL ]
+                </button>
+            </div>
+        </div>
+
+        <!-- ============ ADMIN PANEL ============ -->
+        <div id="adminView" class="hidden fade-in-up">
+            <div class="glass-panel p-5 md:p-7 shadow-[0_0_35px_rgba(255,0,255,0.4)] border-fuchsia-500/50">
+                <div class="flex justify-between items-center border-b border-cyan-500/30 pb-3 mb-5">
+                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500">
+                        <i class="fas fa-shield-haltered mr-2"></i> NEURON ADMIN
+                    </h2>
+                    <button id="closeAdminBtn" class="text-cyan-300 text-xl hover:text-fuchsia-300 transition">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+
+                <!-- Login Area -->
+                <div id="adminLoginArea">
+                    <div class="space-y-4">
+                        <p class="text-cyan-200 font-mono text-sm"><i class="fas fa-key"></i> 6-digit encryption key</p>
+                        <input type="password" id="pinInput" maxlength="6" placeholder="••••••" 
+                               class="w-full bg-black/50 border border-cyan-400/60 rounded-xl py-3 px-4 text-white text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-fuchsia-500 backdrop-blur-sm">
+                        <button id="loginPinBtn" class="w-full bg-gradient-to-r from-cyan-600 to-fuchsia-700 hover:from-cyan-500 hover:to-fuchsia-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
+                            ⚡ ACCESS BIOS ⚡
+                        </button>
+                        <p class="text-red-400 text-xs text-center hidden" id="pinErrorMsg">ACCESS DENIED // mismatch sequence</p>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard -->
+                <div id="adminDashboard" class="hidden">
+                    <div class="flex flex-wrap gap-3 justify-between items-center mb-5">
+                        <div class="flex gap-2">
+                            <button id="addNewLinkBtn" class="bg-fuchsia-600/80 hover:bg-fuchsia-500 text-white px-4 py-2 rounded-full text-sm font-bold transition-all shadow-neon flex items-center gap-2">
+                                <i class="fas fa-plus-circle"></i> New Link
+                            </button>
+                            <button id="toggleSoundBtn" class="bg-cyan-800/50 hover:bg-cyan-700 text-cyan-200 px-3 py-2 rounded-full text-sm">
+                                <i class="fas fa-volume-up"></i> <span id="soundStatus">ON</span>
+                            </button>
+                            <button id="changePhotoBtn" class="bg-purple-800/50 hover:bg-purple-700 text-purple-200 px-3 py-2 rounded-full text-sm">
+                                <i class="fas fa-camera"></i> Ganti Foto
+                            </button>
+                        </div>
+                        <span class="text-xs text-cyan-300 font-mono"><i class="fas fa-database"></i> local persistence</span>
+                    </div>
+
+                    <!-- Links List -->
+                    <div class="max-h-[55vh] overflow-y-auto pr-1 space-y-3" id="adminLinksList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Ganti Foto -->
+        <div id="photoModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 hidden transition-all">
+            <div class="glass-panel w-11/12 max-w-md p-6 border-cyan-400 shadow-2xl">
+                <h3 class="text-xl font-bold text-cyan-300 mb-3">📸 Ganti Foto Profil</h3>
+                <input type="text" id="photoUrlInput" placeholder="Masukkan URL gambar (https://...)" class="w-full bg-black/60 border border-cyan-500 rounded-lg p-3 mb-3 text-white">
+                <p class="text-gray-400 text-xs mb-3">Atau upload gambar lokal:</p>
+                <input type="file" id="photoUploadInput" accept="image/*" class="w-full bg-black/60 border border-cyan-500 rounded-lg p-2 mb-4 text-white text-sm">
+                <div class="flex justify-between gap-3">
+                    <button id="savePhotoBtn" class="bg-cyan-600 hover:bg-cyan-500 px-5 py-2 rounded-full text-white flex-1">Simpan</button>
+                    <button id="cancelPhotoBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-white">Batal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Add/Edit Link -->
+        <div id="linkModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 hidden transition-all">
+            <div class="glass-panel w-11/12 max-w-md p-6 border-cyan-400 shadow-2xl">
+                <h3 id="modalTitle" class="text-xl font-bold text-cyan-300 mb-3">➕ Add Link</h3>
+                <input type="text" id="linkEmoji" placeholder="Emoji (e.g. 🎮)" class="w-full bg-black/60 border border-cyan-500 rounded-lg p-2 mb-3 text-white">
+                <input type="text" id="linkTitle" placeholder="Title" class="w-full bg-black/60 border border-cyan-500 rounded-lg p-2 mb-3 text-white">
+                <input type="url" id="linkUrl" placeholder="https://..." class="w-full bg-black/60 border border-cyan-500 rounded-lg p-2 mb-3 text-white">
+                <div class="flex justify-between gap-3">
+                    <button id="modalSaveBtn" class="bg-cyan-600 hover:bg-cyan-500 px-5 py-2 rounded-full text-white flex-1">Save</button>
+                    <button id="modalCancelBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-white">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="clickSound" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/button-click-01.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // ============ KONFIGURASI ============
+        const STORAGE_KEY = 'xinn_cyber_links';
+        const PROFILE_PHOTO_KEY = 'xinn_profile_photo';
+        const PIN_CODE = '260422';  // PIN: 260422
+        let links = [];
+        let soundEnabled = true;
+        let isAdminLogged = false;
+
+        // DOM Elements
+        const publicView = document.getElementById('publicView');
+        const adminView = document.getElementById('adminView');
+        const openAdminBtn = document.getElementById('openAdminBtn');
+        const closeAdminBtn = document.getElementById('closeAdminBtn');
+        const adminLoginArea = document.getElementById('adminLoginArea');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const loginPinBtn = document.getElementById('loginPinBtn');
+        const pinInput = document.getElementById('pinInput');
+        const pinErrorMsg = document.getElementById('pinErrorMsg');
+        const linksContainer = document.getElementById('linksContainer');
+        const adminLinksList = document.getElementById('adminLinksList');
+        const addNewLinkBtn = document.getElementById('addNewLinkBtn');
+        const toggleSoundBtn = document.getElementById('toggleSoundBtn');
+        const soundStatusSpan = document.getElementById('soundStatus');
+        const changePhotoBtn = document.getElementById('changePhotoBtn');
+        const photoModal = document.getElementById('photoModal');
+        const photoUrlInput = document.getElementById('photoUrlInput');
+        const photoUploadInput = document.getElementById('photoUploadInput');
+        const savePhotoBtn = document.getElementById('savePhotoBtn');
+        const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
+        const profileImage = document.getElementById('profileImage');
+        
+        // Modal Link
+        const modal = document.getElementById('linkModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const linkEmoji = document.getElementById('linkEmoji');
+        const linkTitle = document.getElementById('linkTitle');
+        const linkUrl = document.getElementById('linkUrl');
+        const modalSaveBtn = document.getElementById('modalSaveBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        let editingLinkId = null;
+        let sortableInstance = null;
+
+        // ============ FUNGSI FOTO PROFIL ============
+        function loadProfilePhoto() {
+            const savedPhoto = localStorage.getItem(PROFILE_PHOTO_KEY);
+            if (savedPhoto) {
+                profileImage.src = savedPhoto;
+            }
+        }
+
+        function saveProfilePhoto(url) {
+            localStorage.setItem(PROFILE_PHOTO_KEY, url);
+            profileImage.src = url;
+        }
+
+        // ============ FUNGSI LINK ============
+        function loadLinks() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if(stored) {
+                links = JSON.parse(stored);
+            } else {
+                links = [
+                    { id: '1', emoji: '🤖', title: 'Neural Portfolio', url: 'https://github.com', visible: true, order: 0 },
+                    { id: '2', emoji: '🎮', title: 'Cyber Arcade', url: 'https://itch.io', visible: true, order: 1 },
+                    { id: '3', emoji: '📡', title: 'Hacker Chat', url: 'https://discord.com', visible: true, order: 2 },
+                    { id: '4', emoji: '🎧', title: 'Synthwave Vibes', url: 'https://soundcloud.com', visible: true, order: 3 }
+                ];
+                saveLinks();
+            }
+            links.sort((a,b) => (a.order || 0) - (b.order || 0));
+            renderPublicLinks();
+            if(isAdminLogged) renderAdminLinks();
+        }
+
+        function saveLinks() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+        }
+
+        function playClick() {
+            if(soundEnabled) {
+                const audio = document.getElementById('clickSound');
+                if(audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log("Audio need user interaction first"));
+                }
+            }
+        }
+
+        function renderPublicLinks() {
+            const visibleLinks = links.filter(l => l.visible !== false).sort((a,b)=> (a.order||0)-(b.order||0));
+            if(visibleLinks.length === 0) {
+                linksContainer.innerHTML = `<div class="text-center text-cyan-400/50 font-mono py-8 glass-card rounded-2xl">⟁ no active links ⟁</div>`;
+                return;
+            }
+            linksContainer.innerHTML = visibleLinks.map(link => `
+                <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="block w-full transition-all duration-300">
+                    <div class="glass-card rounded-2xl py-4 px-5 flex items-center gap-4 border border-cyan-400/40 hover:border-cyan-300 shadow-md transition-all">
+                        <span class="text-3xl drop-shadow-md">${link.emoji || '🔗'}</span>
+                        <span class="text-white font-semibold text-lg tracking-wide flex-1">${escapeHtml(link.title)}</span>
+                        <i class="fas fa-arrow-right text-cyan-300 opacity-70 group-hover:opacity-100 transition-all"></i>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function renderAdminLinks() {
+            if(!adminLinksList) return;
+            const sorted = [...links].sort((a,b)=> (a.order||0)-(b.order||0));
+            adminLinksList.innerHTML = sorted.map(link => `
+                <div data-id="${link.id}" class="link-item glass-card rounded-xl p-3 flex flex-wrap items-center gap-3 border border-fuchsia-500/30">
+                    <div class="drag-handle cursor-grab text-cyan-300 text-xl px-1"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="flex items-center gap-2 flex-1 min-w-[140px]">
+                        <span class="text-2xl">${link.emoji || '🔗'}</span>
+                        <span class="text-white font-medium truncate max-w-[130px]">${escapeHtml(link.title)}</span>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button class="toggle-visibility text-cyan-300 hover:text-cyan-100" data-id="${link.id}" data-visible="${link.visible}">
+                            <i class="fas ${link.visible !== false ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                        </button>
+                        <button class="edit-link text-fuchsia-300 hover:text-fuchsia-200" data-id="${link.id}"><i class="fas fa-pen"></i></button>
+                        <button class="delete-link text-red-400 hover:text-red-300" data-id="${link.id}"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Event listeners admin
+            document.querySelectorAll('.toggle-visibility').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    const link = links.find(l => l.id === id);
+                    if(link) {
+                        link.visible = !(link.visible === false);
+                        saveLinks();
+                        renderPublicLinks();
+                        renderAdminLinks();
+                        playClick();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.edit-link').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    const link = links.find(l => l.id === id);
+                    if(link) {
+                        editingLinkId = link.id;
+                        modalTitle.innerText = '✎ Edit Link';
+                        linkEmoji.value = link.emoji || '';
+                        linkTitle.value = link.title;
+                        linkUrl.value = link.url;
+                        modal.classList.remove('hidden');
+                        playClick();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-link').forEach(btn => {
+                btn.addEventListener('cl
